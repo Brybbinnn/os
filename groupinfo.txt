@@ -1,3 +1,5 @@
 Group _
 Bryndís Gunnarsdóttir (bryndisg21)
 Viggó Ýmir Hafliðason (viggoh21)
+
+$gcc helloworld.c -o helloworld$./helloworld
