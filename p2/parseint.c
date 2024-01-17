@@ -23,7 +23,12 @@ int convertDecimalDigit(char c)
 int parseInt(char *string)
 {
     (void)string;
-
+    if (string[0] == '0'){
+        scanf("%d", string);
+        print("%o", string);
+    } else {
+        print("%d", string)
+    }
     return -1;
 }
 
