@@ -7,7 +7,7 @@ void print_line(int64_t number, char *string)
     (void) string;
     // Add code here.
     
-    printf("%d %s", number, string);
+    printf("%lld %s", number, string);
 }
 
 int main(void) {
