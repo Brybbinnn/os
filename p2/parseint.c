@@ -1,6 +1,5 @@
 #include "parseint.h"
 #include <stdio.h>
-#include <string.h>
 
 /*
  * Returns the value of c or -1 on error
@@ -28,14 +27,15 @@ int parseInt(char *string)
     int octal_sum = 0;
 
     if (string[0] == '0'){
-        for (int i = 0; i = strlen(string); i++) {
-            octal_sum += string[i];
+        for (int i = 0; string[i] != '\0'; i++) {
+            if (string[i] == '0');
         }
-        printf("%d", octal_sum);
-    } else {
+        printf("%o", octal_sum);
+    } else if (string[0] != '0') {
         printf("%d", string);
+    } else {
+        return -1;
     }
-    return -1;
 }
 
 int main(void) {
