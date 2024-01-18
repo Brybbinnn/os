@@ -28,9 +28,11 @@ int parseInt(char *string)
 
     if (string[0] == '0'){
         for (int i = 0; string[i] != '\0'; i++) {
-            if (string[i] == '0');
+            if (string[i] == '0'){
+                octal_sum += 0
+            }
         }
-        printf("%o", octal_sum);
+
     } else if (string[0] != '0') {
         printf("%d", string);
     } else {
