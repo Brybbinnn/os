@@ -17,17 +17,18 @@ int convertDecimalDigit(char c)
 }
 
 int octalToDecimal(int n) {
+    
+    // Initializing values
     int decimalvalue = 0;
     int base = 1;
     int temp = n;
    
     while (temp) 
     {
-        // Finding the last digit
-        int lastdigit = temp % 10;
-        temp = temp / 10;
-        decimalvalue += lastdigit * base;
-        base = base * 8;
+        int lastdigit = temp % 10;          // Find the last digit of temp
+        temp = temp / 10;                   // Remove the last digit from temp
+        decimalvalue += lastdigit * base;   // Convert and add the last digit to the decimal value
+        base = base * 8;                    // Update the base value for the next digit
     }
  
     return decimalvalue;
@@ -39,44 +40,23 @@ int octalToDecimal(int n) {
  * decimal otherwise. Returns -1 on error.
  */
 int parseInt(char *string) {
+
+    // Initializing values
     int i, result = 0;
 
     for (i = 0; string[i] != '\0'; i++) {
-        int digit = convertDecimalDigit(string[i]);
+        int digit = convertDecimalDigit(string[i]);     // Convert character to digit
 
         if (digit == -1) {
-            // Handle non-digit characters (e.g., '?')
-            return -1;  // Or handle the error in another way
+            return -1;                                  // Handle non-digit characters by returning an error (-1)
         }
 
-        result = result * 10 + digit;
+        result = result * 10 + digit;                   // Build the result by appending the converted digit
     }
 
     if (string[0] == '0') {
-        return octalToDecimal(result);
+        return octalToDecimal(result);                  // If the first character is '0', interpret the result as octal and convert
     } else {
-        return result;
+        return result;                                  // Otherwise, return the result as a decimal integer
     }
-}
-
-
-
-
-int main() {
-    printf("%d", convertDecimalDigit('0'));
-    printf("%s", "\nThe program finished running \"0\" through parseInt. \n");
-    printf("%d", parseInt("010"));
-    printf("%s", "\nThe program finished running \"010\" through parseInt. \n");
-    printf("%d", parseInt("10"));
-    printf("%s", "\nThe program finished running \"10\" through parseInt. \n");
-    printf("%d", parseInt("?"));
-    printf("%s", "\nThe program finished running \"?\" through parseInt. \n");
-    printf("%d", convertDecimalDigit('9'));
-    printf("%s", "\nThe program finished running \"9\" through parseInt. \n");
-    printf("%d", parseInt("012"));
-    printf("%s", "\nThe program finished running \"012\" through parseInt. \n");
-    printf("%d", parseInt("350"));
-    printf("%s", "\nThe program finished running \"350\" through parseInt. \n");
-    printf("%d", parseInt("ö"));
-    printf("%s", "\nThe program finished running \"ö\" through parseInt. \n");
 }
