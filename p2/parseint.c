@@ -39,31 +39,44 @@ int octalToDecimal(int n) {
  * decimal otherwise. Returns -1 on error.
  */
 int parseInt(char *string) {
-    (void)string;
-
     int i, result = 0;
-    char ans[3] = {};
 
-    for (int i = 0; string[i] != '\0'; i++) {
-        result = result * 10 + (string[i] - '0');
+    for (i = 0; string[i] != '\0'; i++) {
+        int digit = convertDecimalDigit(string[i]);
+
+        if (digit == -1) {
+            // Handle non-digit characters (e.g., '?')
+            return -1;  // Or handle the error in another way
+        }
+
+        result = result * 10 + digit;
     }
 
     if (string[0] == '0') {
         return octalToDecimal(result);
     } else {
-        for (int i = 0; string[i] != '\0'; i++) {
-            ans[i] = convertDecimalDigit(string[i]);
-        }
-        return *ans;
+        return result;
     }
 }
 
 
+
+
 int main() {
+    printf("%d", convertDecimalDigit('0'));
+    printf("%s", "\nThe program finished running \"0\" through parseInt. \n");
     printf("%d", parseInt("010"));
-    printf("%s", "The program finished running \"010\" through parseInt. \n");
+    printf("%s", "\nThe program finished running \"010\" through parseInt. \n");
     printf("%d", parseInt("10"));
-    printf("%s", "The program finished running \"10\" through parseInt. \n");
+    printf("%s", "\nThe program finished running \"10\" through parseInt. \n");
     printf("%d", parseInt("?"));
-    printf("%s", "The program finished running \"?\" through parseInt. \n");
+    printf("%s", "\nThe program finished running \"?\" through parseInt. \n");
+    printf("%d", convertDecimalDigit('9'));
+    printf("%s", "\nThe program finished running \"9\" through parseInt. \n");
+    printf("%d", parseInt("012"));
+    printf("%s", "\nThe program finished running \"012\" through parseInt. \n");
+    printf("%d", parseInt("350"));
+    printf("%s", "\nThe program finished running \"350\" through parseInt. \n");
+    printf("%d", parseInt("ö"));
+    printf("%s", "\nThe program finished running \"ö\" through parseInt. \n");
 }
