@@ -42,7 +42,7 @@ int parseInt(char *string) {
     (void)string;
 
     int i, result = 0;
-    int ans;
+    char ans[3] = {};
 
     for (int i = 0; string[i] != '\0'; i++) {
         result = result * 10 + (string[i] - '0');
@@ -52,9 +52,9 @@ int parseInt(char *string) {
         return octalToDecimal(result);
     } else {
         for (int i = 0; string[i] != '\0'; i++) {
-            ans += convertDecimalDigit(string[i]);
+            ans[i] = convertDecimalDigit(string[i]);
         }
-        return ans;
+        return *ans;
     }
 }
 
@@ -64,8 +64,6 @@ int main() {
     printf("%s", "The program finished running \"010\" through parseInt. \n");
     printf("%d", parseInt("10"));
     printf("%s", "The program finished running \"10\" through parseInt. \n");
-    printf("%d", parseInt("350"));
-    printf("%s", "The program finished running \"350\" through parseInt. \n");
     printf("%d", parseInt("?"));
     printf("%s", "The program finished running \"?\" through parseInt. \n");
 }
