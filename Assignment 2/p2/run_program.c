@@ -14,6 +14,7 @@ int run_program(char *file_path, char *argv[])
         All values besides 0 are stored in _Bool as
         True. 
     */
+
     _Bool contains_slash = 0;
 
     /*
@@ -36,13 +37,18 @@ int run_program(char *file_path, char *argv[])
     /*
         May be unnecesary. 
     */
-    if (contains_slash == 0) {
+    if (file_path == 0) {
+        return ERROR_CODE;                  // Special Error Value? ¯\_(ツ)_/¯
+    
+    } else if (contains_slash == 0) {
         fopen(file_path, "r");
 
     } else if (contains_slash == 1) {
         fopen(file_path, "r");
     
-    }
+    } else {                                // Every case above this checks
+        return 0;                           // for errors, so this else runs
+    }                                       // only when the function is successful.
 
 
     // remember to return ERROR_CODE on error.
