@@ -8,16 +8,6 @@ int run_program(char *file_path, char *argv[])
     (void) argv;
 
     /*
-        Declared as _Bool because bool alias needs to
-        be imported with <stdbool.h>.
-
-        All values besides 0 are stored in _Bool as
-        True. 
-    */
-
-    _Bool contains_slash = 0;
-
-    /*
         Meant to check if *file_path variable contains
         any "/" characters and return a boolean value
         if it does.
@@ -27,24 +17,33 @@ int run_program(char *file_path, char *argv[])
         because if the file wasn't in the CWD the path
         to it would have to contain a "/".
     */
-    for (int i = 0; i != "\0"; i++){
-        if (file_path[i] == "/"){
-            contains_slash = 1;
+    if (strchr(file_path, '/') != NULL) {
+        if (execv(file_path, argv) == -1) {
+            perror(ERROR_CODE);
+            exit(ERROR_CODE);
+        }
+    } else {
+
+        char *path = getenv("PATH"); // what is path bro
+        if (path == NULL) {
+            printf("Error");
         }
     }
 
 
+
     /*
-        May be unnecesary. 
+        May be unnecesary. Or stupid.
     */
     if (file_path == 0) {
-        return ERROR_CODE;                  // Special Error Value? ¯\_(ツ)_/¯
+        return ERROR_CODE;                  // Special Error Value
     
     } else if (contains_slash == 0) {
-        fopen(file_path, "r");
+        
 
     } else if (contains_slash == 1) {
-        fopen(file_path, "r");
+        if (execv(file_path, argv) != -1)
+
     
     } else {                                // Every case above this checks
         return 0;                           // for errors, so this else runs
