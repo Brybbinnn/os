@@ -106,8 +106,7 @@ void _enqueue(Queue *queue, tid_t tid)
  * Remove and get the head of the queue.
  * Return -1 if the queue is empty.
  */
-tid_t _dequeue(Queue *queue)
-{
+tid_t _dequeue(Queue *queue) {
     (void)queue;
 
     // TODO: Implement
@@ -116,7 +115,7 @@ tid_t _dequeue(Queue *queue)
     }
     else {
         tmp = queue->head;
-        queue->head = queue->head->next
+        queue->head = queue->head->next;
         return tmp;
     }
     /*  
