@@ -9,54 +9,61 @@ struct ListItem {
 
 struct ListItem *listHead = NULL;
 
-void appendItem(int valie) {
-    // ... implement this
+
+void appendItem(int value) {
     // append at the end of the list
 
     struct ListItem *newItem;
     newItem = malloc(sizeof(struct ListItem));
-    newItem->value = valie;
+    newItem->value = value;
     newItem->next = NULL;
 
-    if (listHead->next == NULL) {
-        listHead->next = newItem;
+    if (listHead == NULL) {
+        listHead = newItem;
     } else {
-        struct ListItem *temp = listHead;
-        while (temp->next != NULL) {
-            temp = temp->next;
+        struct ListItem *current = listHead;
+        while (current->next != NULL) {
+            current = current->next;
         }
-        temp->next = newItem;
+        current->next = newItem;
     }
-    
-
 }
 
 
 int removeFirstItem() {
-    // implement this
     // removes the first item from the list and returns its value; returns −1 if list is empty
-    if (listHead->next == NULL) {
+
+    if (listHead == NULL) {
         return -1;
 
     } else{
-        int temp = listHead->next->value;
-        listHead->next = listHead->next->next;
-        return temp;
+        struct ListItem *tbr = listHead;
+        listHead = listHead->next;
+        int value = tbr->value;
+        free(tbr);
+        return value;
     }
 }
 
 
 int containsItem(int value) {
-    // implement this
     // return true (1) if list contains value, false (0) if not
+
+    struct ListItem *current = listHead;
+    while (current != NULL) {
+        if (current->value == value) {
+            return 1;
+        }
+        current = current->next;
+    }
     return 0;
 }
 
 
 int isEmpty() {
-    // implement this
-    // return true (1) if list is empty, false (0) otherweise
-    return 0;
+    // return true (1) if list is empty, false (0) otherweise    
+
+    return listHead == NULL ? 1 : 0;
 }
 
 

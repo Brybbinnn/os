@@ -80,17 +80,54 @@ void _enqueue(Queue *queue, tid_t tid)
     (void)tid;
 
     // TODO: Implement
+
+    /* 
+        Should be easy as queue.tail = tid_t tid ?
+    
+        if (ERROR CASE) {
+            return ;
+
+        } else {
+                
+            }
+
+        }
+    
+    */ 
+
+    (QueueItem)head = queue->head;
+    temp = malloc(queue->tail);
+    for (head->next == queue->tail) {
+
+
 }
 
 /*
  * Remove and get the head of the queue.
  * Return -1 if the queue is empty.
  */
-tid_t _dequeue(Queue *queue)
-{
+tid_t _dequeue(Queue *queue) {
     (void)queue;
 
     // TODO: Implement
+    if (queue == {0}) {
+        return -1;
+    }
+    else {
+        tmp = queue->head;
+        queue->head = queue->head->next;
+        return tmp;
+    }
+    /*  
+        if (queue == 0) {
+            return -1;
+
+        } 
+
+        temp = queue->head
+        queue->head = temp->next
+    */
+
     return -1;
 }
 
