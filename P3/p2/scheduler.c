@@ -115,7 +115,9 @@ tid_t _dequeue(Queue *queue)
         return -1;
     }
     else {
-        
+        tmp = queue->head;
+        queue->head = queue->head->next
+        return tmp;
     }
     /*  
         if (queue == 0) {
