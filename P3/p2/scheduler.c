@@ -80,26 +80,20 @@ void _enqueue(Queue *queue, tid_t tid)
     (void)tid;
 
     // TODO: Implement
+ 
+    struct _QueueItem *newQueueItem;
+    newQueueItem = malloc(sizeof(struct _QueueItem));
+    newQueueItem->tid = tid;
 
-    /* 
-        Should be easy as queue.tail = tid_t tid ?
-    
-        if (ERROR CASE) {
-            return ;
-
-        } else {
-            (QueueItem)head = queue->head;
-            temp = malloc(queue->tail);
-            for (head->next == queue->tail) {
-                
-            }
-
+    if (queue->head == 0 && queue->tail == NULL) {
+        queue->head, queue->tail = newQueueItem;
+    } else {
+        struct _QueueItem *current = queue->head;
+        while (current->next != 0) {
+            current = current->next;
         }
-    
-    */ 
-
-
-
+        current->next = newQueueItem;
+    }
 }
 
 /*
@@ -108,25 +102,19 @@ void _enqueue(Queue *queue, tid_t tid)
  */
 tid_t _dequeue(Queue *queue) {
     (void)queue;
+    QueueItem *tmp;
 
     // TODO: Implement
-    if (queue == {0}) {
+    if (queue == 0) {
         return -1;
     }
     else {
         tmp = queue->head;
         queue->head = queue->head->next;
-        return tmp;
+        tid_t value = tmp->tid;
+        free(tmp);
+        return value;
     }
-    /*
-        if (queue == 0) {
-            return -1;
-
-        }
-
-        tmp = queue->head
-        queue->head = tmp->next
-    */
 
     return -1;
 }
@@ -134,6 +122,7 @@ tid_t _dequeue(Queue *queue) {
 void initScheduler()
 {
     // TODO: Implement if you need to initialize any global variables you added
+    
 }
 
 /*
@@ -144,6 +133,15 @@ void onThreadReady(tid_t threadId)
     (void)threadId;
 
     // TODO: Implement
+
+    /*
+        Ég veit ekki afhverju &,
+        en það virkar? I mean þá
+        að það er engin villa...
+    */
+
+    _enqueue(&queue, threadId);
+
 }
 
 /*
@@ -153,8 +151,15 @@ void onThreadReady(tid_t threadId)
 void onThreadPreempted(tid_t threadId)
 {
     (void)threadId;
-
+    
     // TODO: Implement
+
+    /*    
+        ¯\_(ツ)_/¯
+    */
+
+    _threads[threadId].state = STATE_WAITING;
+
 }
 
 /*
@@ -165,6 +170,12 @@ void onThreadWaiting(tid_t threadId)
     (void)threadId;
 
     // TODO: Implement
+
+    /*
+        Held ánd MF djóks að þetta sé MÁLIÐ XDDDD
+    */
+    startThread(threadId);
+
 }
 
 /*
@@ -173,6 +184,15 @@ void onThreadWaiting(tid_t threadId)
 tid_t scheduleNextThread()
 {
     // TODO: Implement
+
+    /*
+        s
+        s
+        s
+    */
+
+    
+
     return 999;
 }
 
