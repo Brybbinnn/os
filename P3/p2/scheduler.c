@@ -88,6 +88,9 @@ void _enqueue(Queue *queue, tid_t tid)
             return ;
 
         } else {
+            (QueueItem)head = queue->head;
+            temp = malloc(queue->tail);
+            for (head->next == queue->tail) {
                 
             }
 
@@ -95,9 +98,6 @@ void _enqueue(Queue *queue, tid_t tid)
     
     */ 
 
-    (QueueItem)head = queue->head;
-    temp = malloc(queue->tail);
-    for (head->next == queue->tail) {
 
 
 }
@@ -118,14 +118,14 @@ tid_t _dequeue(Queue *queue) {
         queue->head = queue->head->next;
         return tmp;
     }
-    /*  
+    /*
         if (queue == 0) {
             return -1;
 
-        } 
+        }
 
-        temp = queue->head
-        queue->head = temp->next
+        tmp = queue->head
+        queue->head = tmp->next
     */
 
     return -1;
