@@ -1,5 +1,5 @@
-// Authors: abcde fghij [replace with your RU login IDs]
-// Group: xzy [replace with your group number]
+// Authors: bryndisg21@ru.is viggoh21@ru.is [replace with your RU login IDs]
+// Group: 66 [replace with your group number]
 #include "scheduler.h"
 #include <stdlib.h>
 #include <assert.h>
