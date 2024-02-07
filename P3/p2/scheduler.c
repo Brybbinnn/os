@@ -86,7 +86,8 @@ void _enqueue(Queue *queue, tid_t tid)
     newQueueItem->tid = tid;
 
     if (queue->head == 0 && queue->tail == NULL) {
-        queue->head, queue->tail = newQueueItem;
+        queue->head = newQueueItem; 
+        queue->tail = newQueueItem;
     } else {
         struct _QueueItem *current = queue->head;
         while (current->next != 0) {
@@ -181,7 +182,7 @@ void onThreadWaiting(tid_t threadId)
 /*
  * Gets the id of the next thread to run and sets its state to running.
  */
-// Your scheduker should return -1 if the ready queue is currently empty. Otherwise, 
+// Your scheduler should return -1 if the ready queue is currently empty. Otherwise, 
 // it should remove the head of the queue and return the thread ID of the remove element as thread to be executed next
 tid_t scheduleNextThread()
 {
@@ -189,7 +190,7 @@ tid_t scheduleNextThread()
 
     /*
     */
-    if (_threads == 0) {
+    if (sizeof(queue) == 0) {
         return -1;
     } else {
         tid_t tmp = _dequeue(&queue);
@@ -199,7 +200,6 @@ tid_t scheduleNextThread()
 }
 
 
-#if 0
 int main() {
 	// Initially empty queue (head and tail is NULL)
 	Queue q = {NULL,NULL};
@@ -212,4 +212,3 @@ int main() {
 	x = _dequeue( &q );
 	printf("Expect: 99, and I got: %d\n", x);
 }
-#endif
