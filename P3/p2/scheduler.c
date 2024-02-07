@@ -139,9 +139,10 @@ void onThreadReady(tid_t threadId)
         en það virkar? I mean þá
         að það er engin villa...
     */
+    if (_threads[threadId].state == STATE_READY) {
 
     _enqueue(&queue, threadId);
-
+    }
 }
 
 /*
@@ -158,8 +159,7 @@ void onThreadPreempted(tid_t threadId)
         ¯\_(ツ)_/¯
     */
 
-    _threads[threadId].state = STATE_WAITING;
-
+    _threads[threadId].state = STATE_RUNNING;
 }
 
 /*
@@ -174,26 +174,28 @@ void onThreadWaiting(tid_t threadId)
     /*
         Held ánd MF djóks að þetta sé MÁLIÐ XDDDD
     */
+    _threads[threadId].state = STATE_WAITING;
     startThread(threadId);
-
 }
 
 /*
  * Gets the id of the next thread to run and sets its state to running.
  */
+// Your scheduker should return -1 if the ready queue is currently empty. Otherwise, 
+// it should remove the head of the queue and return the thread ID of the remove element as thread to be executed next
 tid_t scheduleNextThread()
 {
     // TODO: Implement
 
     /*
-        s
-        s
-        s
     */
-
-    
-
-    return 999;
+    if (_threads == 0) {
+        return -1;
+    } else {
+        tid_t tmp = _dequeue(&queue);
+        _threads[tmp].state = STATE_RUNNING;
+        return tmp;
+    }
 }
 
 
