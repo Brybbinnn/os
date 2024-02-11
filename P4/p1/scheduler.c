@@ -106,6 +106,11 @@ void onThreadReady(int threadId)
     (void)threadId;
 
     // TODO: Implement
+    /*
+    void onThreadReady(int threadId) is called if a thread in waiting state becomes
+    ready (e.g., thread was blocked on an I/O operation before, and the I/O operation
+    has finished). The thread needs to be placed in the appropriate runqueue.
+    */
 }
 
 /*
@@ -117,6 +122,10 @@ void onThreadPreempted(int threadId)
     (void)threadId;
 
     // TODO: Implement
+    /*
+    void onThreadPreempted(int threadId) is called if a running thread was preempted.
+    It also needs to be placed in the right runqueue, as it is ready to continue.
+    */
 }
 
 /*
@@ -127,6 +136,11 @@ void onThreadWaiting(int threadId)
     (void)threadId;
 
     // TODO: Implement
+    /*
+    void onThreadWaiting(int threadId) is called when a thread blocks (e.g., on an
+    I/O operation). Such a thread enters the waiting state and will not be part of any
+    runqueue.
+    */
 }
 
 /*
