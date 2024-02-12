@@ -50,6 +50,7 @@ typedef struct _Thread {
 Thread _threads[MAX_THREADS] = {{0}};
 
 /* TODO: Add global variables if needed. */
+Queue queue = {0};
 
 /*
  * Adds a new, waiting thread.
@@ -75,8 +76,26 @@ int startThread(int threadId, int priority)
  */
 void _enqueue(Queue *queue, int tid)
 {
-    (void)queue;
-    (void)tid;
+    // Scheduler Solution >>
+
+    assert(queue != NULL);
+
+    QueueItem *item = (QueueItem*)malloc(sizeof(QueueItem));
+    if (item == NULL) {
+        return;
+    }
+
+    item->tid = tid;
+    item->next = NULL;
+    if (queue->head == NULL) {
+        queue->head = item;
+    } else {
+        assert(queue->tail != NULL);
+
+        queue->tail->next = item;
+    }
+
+    queue->tail = item;
 
     // TODO: Implement
 }
@@ -87,10 +106,21 @@ void _enqueue(Queue *queue, int tid)
  */
 int _dequeue(Queue *queue)
 {
-    (void)queue;
+    // Scheduler Solution >>
+
+    assert(queue != NULL);
+
+    if (queue->head == NULL) {
+        return -1;
+    }
+
+    QueueItem *head = queue->head;
+    tid_t tid = head->tid;
+    queue->head = head->next;
+    free(head);
 
     // TODO: Implement
-    return -1;
+    return tid;
 }
 
 void initScheduler()
@@ -98,12 +128,27 @@ void initScheduler()
     // TODO: Implement if you need to initialize any global variables you added
 }
 
+static void _enqueueThread(tid_t threadId)
+{
+    assert((threadId >= 0) && (threadId < MAX_THREADS));
+    assert(_threads[threadId].state == STATE_READY);
+
+    // Append a thread to the right ready queue.
+    _enqueue(&queue, threadId);
+}
+
 /*
  * Called whenever a waiting thread gets ready to run.
  */
 void onThreadReady(int threadId)
 {
-    (void)threadId;
+    // Scheduler Solution >>
+
+    assert((threadId >= 0) && (threadId < MAX_THREADS));
+    assert(_threads[threadId].state == STATE_WAITING);
+
+    _threads[threadId].state = STATE_READY;
+    _enqueueThread(threadId);
 
     // TODO: Implement
     /*
@@ -119,7 +164,13 @@ void onThreadReady(int threadId)
  */
 void onThreadPreempted(int threadId)
 {
-    (void)threadId;
+    // Scheduler Solution >>
+
+    assert((threadId >= 0) && (threadId < MAX_THREADS));
+    assert(_threads[threadId].state == STATE_RUNNING);
+
+    _threads[threadId].state = STATE_READY;
+    _enqueueThread(threadId);
 
     // TODO: Implement
     /*
@@ -133,8 +184,12 @@ void onThreadPreempted(int threadId)
  */
 void onThreadWaiting(int threadId)
 {
-    (void)threadId;
+    // Scheduler Solution >>
 
+    assert((threadId >= 0) && (threadId < MAX_THREADS));
+    assert(_threads[threadId].state == STATE_RUNNING);
+
+    _threads[threadId].state = STATE_WAITING;
     // TODO: Implement
     /*
     void onThreadWaiting(int threadId) is called when a thread blocks (e.g., on an
