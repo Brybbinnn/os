@@ -1,3 +1,5 @@
+// Authors: bryndisg21@ru.is viggoh21@ru.is
+// Group: 66
 #include "scheduler.h"
 #include <stdlib.h>
 #include <assert.h>
@@ -187,8 +189,6 @@ int scheduleNextThread()
             return -1;
         }
     }
-
-
 
     _threads[tid].state = STATE_RUNNING;
     return tid;
