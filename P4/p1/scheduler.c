@@ -150,6 +150,12 @@ int scheduleNextThread()
 {
     // TODO: Implement
     return -1;
+    /*
+    Implement the priority scheduling policy Your scheduling function should perform the
+    following basic operations whenever a new thread needs to be selected: 4 P-pt
+        • Find the ready queue with the highest priority that contains a ready thread
+        • Remove the first thread from the queue, updates its state and returns its thread id
+    */
 }
 
 
