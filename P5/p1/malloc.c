@@ -75,10 +75,10 @@ uint64_t roundUp(uint64_t n)
 {
 	(void) n;
 
-	
+	//TODO: Implement
+
 	n = ((n / 16) + 1) * 16;
 
-	//TODO: Implement
 	return 0;
 }
 
@@ -103,6 +103,9 @@ static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block
 	//  as long as this function is unimplemented
 
 	// TODO: Implement
+
+
+
 	return NULL;
 }
 
@@ -115,6 +118,19 @@ void *my_malloc(uint64_t size)
 	// Suggested approach: Search for a free block, then call allocate_block with that block
  	// (and suitable values for update_next and new_size)
 	// This is not mandatory, what counts in the and is that my_malloc does the right thing.
+
+	Block *current;
+
+	current = _firstFreeBlock;
+
+	while (current) {
+		if (current->size = size) {
+			allocate_block(&current, current, (size + 16));
+		}
+		current = current->next;
+	}
+
+
 	return NULL;
 }
 
