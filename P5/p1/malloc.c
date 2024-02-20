@@ -95,7 +95,7 @@ uint64_t roundUp(uint64_t n)
  *   replace block with a new free block starting somewhere within block
  */
 static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block *block, uint64_t new_size) {
-	(void)update_next;
+	(void)update_next; // HELP ég skil ekki alveg hvað þetta er. Pointer á next þ.s. next bendir á block-ið sem v. erum að skrifa??
 	(void)block;
 	(void)new_size;
 	// BTW, feel free to remove these lines starting (void)
@@ -103,8 +103,26 @@ static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block
 	//  as long as this function is unimplemented
 
 	// TODO: Implement
+	//If the free block is of exactly the requested size, removes the free block from the
+	//free-list, marks it with the magic number, and returns a pointer to the beginning of
+	//the block’s data area.
+	
+	//If the free block is larger than the requested size, splits it to create two blocks:
+	//(1) One (at the lower address) with the requested size. It is marked as used block
+	//with the magic number and returned.
+	//(2) One new free block, which holds the spare free space. Don’t forget to put it into
+	//the free-list (instead of the original free block) by updating the next pointer of the
+	//previous free block (or firstFreeBlock).
+	//Free blocks that are only large enough to hold the block header (i.e., 16 bytes) are
+	//valid blocks with a zero-length unused data region.
 
+	// we roundUp (new_size) in *my_malloc
+	// "new_size is the total size for the new allocation (size requested in the my_malloc call plus header size)"
+	new_size = (new_size + 16);
 
+	if (_firstFreeBlock->next = NULL) {
+
+	}
 
 	return NULL;
 }
@@ -119,16 +137,15 @@ void *my_malloc(uint64_t size)
  	// (and suitable values for update_next and new_size)
 	// This is not mandatory, what counts in the and is that my_malloc does the right thing.
 
-	Block *current;
+	size = roundUp(size);
 
 	current = _firstFreeBlock;
 
 	while (current) {
-		if (current->size = size) {
-			allocate_block(&current, current, (size + 16));
-		}
-		current = current->next;
+		if _firstFreeBlock
+
 	}
+
 
 
 	return NULL;
@@ -154,6 +171,10 @@ void my_free(void *address)
 	(void) address;
 
 	// TODO: Implement
+
+	// !!
+	// MUNA að láta _firstfreeblock verða pointer á address ef address er á undan gamla _firstfreeblock!!
+
 }
 
 
