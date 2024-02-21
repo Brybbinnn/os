@@ -109,22 +109,7 @@ static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block
 	//  as long as this function is unimplemented
 
 	// TODO: Implement
-	//If the free block is of exactly the requested size, removes the free block from the
-	//free-list, marks it with the magic number, and returns a pointer to the beginning of
-	//the block’s data area.
-	
-	//If the free block is larger than the requested size, splits it to create two blocks:
-	//(1) One (at the lower address) with the requested size. It is marked as used block
-	//with the magic number and returned.
-	//(2) One new free block, which holds the spare free space. Don’t forget to put it into
-	//the free-list (instead of the original free block) by updating the next pointer of the
-	//previous free block (or firstFreeBlock).
-	//Free blocks that are only large enough to hold the block header (i.e., 16 bytes) are
-	//valid blocks with a zero-length unused data region.
 
-	// we roundUp (new_size) in *my_malloc
-	// "new_size is the total size for the new allocation (size requested in the my_malloc call plus header size)"
-    // Check if we can split the block
     uint64_t remainingSize = block->size - new_size;
     if (remainingSize > sizeof(Block)) { // Ensure there's enough space for a new block header
         // Create a new free block with the remaining size
@@ -185,7 +170,7 @@ void *my_malloc(uint64_t size)
 
 	// return NULL;
 
-	uint64_t totalSize = roundUp(size) + sizeof(BlockHeader); // Assuming BlockHeader includes any necessary metadata
+	uint64_t totalSize = roundUp(size) + 16; // Assuming BlockHeader includes any necessary metadata
     Block **prevNext = &_firstFreeBlock;
     Block *current = _firstFreeBlock;
 
@@ -233,34 +218,34 @@ void my_free(void *address)
 }
 
 
-int main()
-{
-	test_start("malloc.c");
-	initAllocator();
+// int main()
+// {
+// 	test_start("malloc.c");
+// 	initAllocator();
 
-	void *a = my_malloc(2016);
-	my_malloc(3);
-	my_malloc(28372);
-	void *b = my_malloc(16);
-	void *c = my_malloc(5);
-	my_malloc(2112);
+// 	void *a = my_malloc(2016);
+// 	my_malloc(3);
+// 	my_malloc(28372);
+// 	void *b = my_malloc(16);
+// 	void *c = my_malloc(5);
+// 	my_malloc(2112);
 
-	dumpAllocator();
+// 	dumpAllocator();
 
-	my_free(b);
-	my_free(c);
-	my_free(a);
-	dumpAllocator();
-	my_malloc(16746540);
-	my_malloc(1);
-	my_malloc(1);
-	my_malloc(1);
-	my_malloc(1);
-	dumpAllocator();
-	my_malloc(16775168);
-	my_malloc(1);
-	dumpAllocator();
+// 	my_free(b);
+// 	my_free(c);
+// 	my_free(a);
+// 	dumpAllocator();
+// 	my_malloc(16746540);
+// 	my_malloc(1);
+// 	my_malloc(1);
+// 	my_malloc(1);
+// 	my_malloc(1);
+// 	dumpAllocator();
+// 	my_malloc(16775168);
+// 	my_malloc(1);
+// 	dumpAllocator();
 	
-	printf("\nNote: This test always passes. It does not do any checks.\n It just prints the memory layout after some operations\n");
-	return test_end();
-}
+// 	printf("\nNote: This test always passes. It does not do any checks.\n It just prints the memory layout after some operations\n");
+// 	return test_end();
+// }
