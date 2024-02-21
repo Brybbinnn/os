@@ -79,8 +79,11 @@ uint64_t roundUp(uint64_t n)
 {
 
 	//TODO: Implement
-
-	n = ((n / 16) + 1) * 16;
+	if (n % 16 == 0) {
+		return n;
+	} else {
+		n = ((n / 16) + 1) * 16;
+	}
 
 	return n;
 }
@@ -121,13 +124,27 @@ static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block
 
 	// we roundUp (new_size) in *my_malloc
 	// "new_size is the total size for the new allocation (size requested in the my_malloc call plus header size)"
-	new_size = (new_size + 16);
+    // Check if we can split the block
+    uint64_t remainingSize = block->size - new_size;
+    if (remainingSize > sizeof(Block)) { // Ensure there's enough space for a new block header
+        // Create a new free block with the remaining size
+        Block *newBlock = (Block *)((char *)block + new_size);
+        newBlock->size = remainingSize;
+        newBlock->next = block->next;
 
-	if (_firstFreeBlock->next == NULL) {
+        // Update the free list
+        *update_next = newBlock;
+        
+        // Adjust the size of the block being allocated
+        block->size = new_size;
+    } else {
+        // If we can't split the block, just remove it from the free list
+        *update_next = block->next;
+    }
 
-	}
+    block->magic = ALLOCATED_BLOCK_MAGIC;
 
-	return NULL;
+    return block->data; // Return a pointer to the data portion
 }
 
 
@@ -141,32 +158,47 @@ void *my_malloc(uint64_t size)
 	// This is not mandatory, what counts in the and is that my_malloc does the right thing.
 
 	// roundUp size and add header size
-	size = (roundUp(size) + 16);
+	// size = (roundUp(size) + 16);
 
-	Block *current = _firstFreeBlock;
+	// Block *current = _firstFreeBlock;
 
-	while (current) {
-		if (current->size >= size) {
+	// while (current) {
+	// 	if (current->size >= size) {
 
-		// Make copy of current to allocate with
-			Block *temp = current;
+	// 	// Make copy of current to allocate with
+	// 		Block *temp = current;
 
-		// Makes temp a valid block with the correct spell
-			temp->size = size;
-			temp->magic = ALLOCATED_BLOCK_MAGIC;
+	// 	// Makes temp a valid block with the correct spell
+	// 		temp->size = size;
+	// 		temp->magic = ALLOCATED_BLOCK_MAGIC;
 
-		// Takes the allocated size away from _firstFreeBlock
-			current->size -= temp->size;
+	// 	// Takes the allocated size away from _firstFreeBlock
+	// 		current->size -= temp->size;
 
-			return temp;
+	// 		return *temp->data;
 
-		} else {
-			current = current->next;
+	// 	} else {
+	// 		current = current->next;
 
-		}
-	};
+	// 	}
+	// };
 
-	return NULL;
+	// return NULL;
+
+	uint64_t totalSize = roundUp(size) + sizeof(BlockHeader); // Assuming BlockHeader includes any necessary metadata
+    Block **prevNext = &_firstFreeBlock;
+    Block *current = _firstFreeBlock;
+
+    while (current != NULL) {
+        if (current->size >= totalSize) {
+            return allocate_block(prevNext, current, totalSize);
+        }
+        prevNext = &current->next;
+        current = current->next;
+    }
+
+    // No suitable block found
+    return NULL;
 }
 
 /*
@@ -192,9 +224,9 @@ void my_free(void *address)
 	// MUNA að láta _firstfreeblock verða pointer á address ef address er á undan gamla _firstfreeblock!!
 
 	if (address == NULL) {
-		return NULL;
+		return;
 	} else {
-
+		
 
 	}
 
