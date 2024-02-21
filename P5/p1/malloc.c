@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "testlib.h"
+#include "malloc.h"
+#include <stdio.h>
+
 /*
  * This is the heap you should use.
  * The heap does not grow.
@@ -73,13 +77,12 @@ void dumpAllocator()
  */
 uint64_t roundUp(uint64_t n)
 {
-	(void) n;
 
 	//TODO: Implement
 
 	n = ((n / 16) + 1) * 16;
 
-	return 0;
+	return n;
 }
 
 /*
@@ -137,16 +140,31 @@ void *my_malloc(uint64_t size)
  	// (and suitable values for update_next and new_size)
 	// This is not mandatory, what counts in the and is that my_malloc does the right thing.
 
-	size = roundUp(size);
+	// roundUp size and add header size
+	size = (roundUp(size) + 16);
 
-	current = _firstFreeBlock;
+	Block *current = _firstFreeBlock;
 
 	while (current) {
-		if _firstFreeBlock
+		if (current->size >= size) {
 
-	}
+		// Make copy of current to allocate with
+			Block *temp = current;
 
+		// Makes temp a valid block with the correct spell
+			temp->size = size;
+			temp->magic = ALLOCATED_BLOCK_MAGIC;
 
+		// Takes the allocated size away from _firstFreeBlock
+			current->size -= temp->size;
+
+			return temp;
+
+		} else {
+			current = current->next;
+
+		}
+	};
 
 	return NULL;
 }
@@ -168,13 +186,49 @@ static void __attribute__ ((unused)) merge_blocks(Block *block1, Block *block2)
 
 void my_free(void *address)
 {
-	(void) address;
-
 	// TODO: Implement
 
 	// !!
 	// MUNA að láta _firstfreeblock verða pointer á address ef address er á undan gamla _firstfreeblock!!
 
+	if (address = NULL) {
+		return NULL;
+	} else {
+
+
+	}
+
 }
 
 
+int main()
+{
+	test_start("malloc.c");
+	initAllocator();
+
+	void *a = my_malloc(2016);
+	my_malloc(3);
+	my_malloc(28372);
+	void *b = my_malloc(16);
+	void *c = my_malloc(5);
+	my_malloc(2112);
+
+	dumpAllocator();
+
+	my_free(b);
+	my_free(c);
+	my_free(a);
+	dumpAllocator();
+	my_malloc(16746540);
+	my_malloc(1);
+	my_malloc(1);
+	my_malloc(1);
+	my_malloc(1);
+	dumpAllocator();
+	my_malloc(16775168);
+	my_malloc(1);
+	dumpAllocator();
+	
+	printf("\nNote: This test always passes. It does not do any checks.\n It just prints the memory layout after some operations\n");
+	return test_end();
+}
