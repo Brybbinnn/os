@@ -101,24 +101,16 @@ uint64_t roundUp(uint64_t n)
  *   replace block with a new free block starting somewhere within block
  */
 static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block *block, uint64_t new_size) {
-	(void)update_next; // HELP ég skil ekki alveg hvað þetta er. Pointer á next þ.s. next bendir á block-ið sem v. erum að skrifa??
-	(void)block;
-	(void)new_size;
-	// BTW, feel free to remove these lines starting (void)
-	// Their purpose is just to avoid compiler warnings about unused variables
-	//  as long as this function is unimplemented
-
-	// TODO: Implement
 
     uint64_t remainingSize = block->size - new_size;
     if (remainingSize > sizeof(Block)) { // Ensure there's enough space for a new block header
         // Create a new free block with the remaining size
-        Block *newBlock = (Block *)((char *)block + new_size);
-        newBlock->size = remainingSize;
-        newBlock->next = block->next;
+        Block *block2Allocate = (Block *)((char *)block + new_size);
+        block2Allocate->size = remainingSize;
+        block2Allocate->next = block->next;
 
         // Update the free list
-        *update_next = newBlock;
+        *update_next = block2Allocate;
         
         // Adjust the size of the block being allocated
         block->size = new_size;
@@ -129,52 +121,23 @@ static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block
 
     block->magic = ALLOCATED_BLOCK_MAGIC;
 
-    return block->data; // Return a pointer to the data portion
+    return *block->data; // Return a pointer to the data portion
 }
 
 
 void *my_malloc(uint64_t size)
 {
-	(void) size;
-
-	// TODO: Implement
 	// Suggested approach: Search for a free block, then call allocate_block with that block
  	// (and suitable values for update_next and new_size)
 	// This is not mandatory, what counts in the and is that my_malloc does the right thing.
 
 	// roundUp size and add header size
-	// size = (roundUp(size) + 16);
+	uint64_t totalSize = roundUp(size) + 16;
 
-	// Block *current = _firstFreeBlock;
-
-	// while (current) {
-	// 	if (current->size >= size) {
-
-	// 	// Make copy of current to allocate with
-	// 		Block *temp = current;
-
-	// 	// Makes temp a valid block with the correct spell
-	// 		temp->size = size;
-	// 		temp->magic = ALLOCATED_BLOCK_MAGIC;
-
-	// 	// Takes the allocated size away from _firstFreeBlock
-	// 		current->size -= temp->size;
-
-	// 		return *temp->data;
-
-	// 	} else {
-	// 		current = current->next;
-
-	// 	}
-	// };
-
-	// return NULL;
-
-	uint64_t totalSize = roundUp(size) + 16; // Assuming BlockHeader includes any necessary metadata
     Block **prevNext = &_firstFreeBlock;
     Block *current = _firstFreeBlock;
 
-    while (current != NULL) {
+    while (current) {
         if (current->size >= totalSize) {
             return allocate_block(prevNext, current, totalSize);
         }
@@ -211,7 +174,7 @@ void my_free(void *address)
 	if (address == NULL) {
 		return;
 	} else {
-		
+		Block *hptr = (Block *)ptr - 1;
 
 	}
 
