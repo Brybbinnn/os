@@ -123,7 +123,7 @@ static void * __attribute__ ((unused)) allocate_block(Block **update_next, Block
 	// "new_size is the total size for the new allocation (size requested in the my_malloc call plus header size)"
 	new_size = (new_size + 16);
 
-	if (_firstFreeBlock->next = NULL) {
+	if (_firstFreeBlock->next == NULL) {
 
 	}
 
@@ -191,7 +191,7 @@ void my_free(void *address)
 	// !!
 	// MUNA að láta _firstfreeblock verða pointer á address ef address er á undan gamla _firstfreeblock!!
 
-	if (address = NULL) {
+	if (address == NULL) {
 		return NULL;
 	} else {
 
