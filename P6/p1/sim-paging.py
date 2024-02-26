@@ -1,6 +1,5 @@
-import numpy as np
-import matplotlib.pyplot as plt
-
+import numpy as numpy
+import matplotlib.pyplot as matplotlib
 #!/usr/bin/env python3
 
 #
@@ -26,18 +25,25 @@ def get_page_list(filename):
 
     with open(filename, 'r') as file:
         for line in file:
+            if "==" in line:
+                continue # Skip lines that don't contain memory access xD
+            # FISKINN MIIIIIIINN NBANANMMMI  NAMAMIM MNAJM AMMM
+
             components = line.strip().split()  # Split the line into parts
-            if len(components) < 3:  # Skip lines with insufficient data
-                continue
+            temp = components[1]
+            temp = temp.split(",")
+            components[1] = temp[0]
+            components.append(temp[1])
 
-            access_type, v_address, _ = components # Extract the type of access and virtual address along with a throwaway variable
+            if len(components) == 3:  # Skip lines with insufficient data
+                access_type, v_address, _ = components # Extract the type of access and virtual address along with a throwaway variable
 
-            if access_type in ["I", "L", "S", "M"]: # We ignore the size of the access _
-                page_number = int(v_address, 16) // page_size # Convert the virtual address to a page number
-                page_access_list.append(page_number) # Add the page number to the access list
+                if access_type in ["I", "L", "S", "M"]: # We ignore the size of the access _
+                    page_number = int(v_address, 16) // page_size # Convert the virtual address to a page number
+                    page_access_list.append(page_number) # Add the page number to the access list
 
-                if access_type == "I": # If the access type is "I" (instructions), add the page number to the instruction page set
-                    instruction_page_set.add(page_number)
+                    if access_type == "I": # If the access type is "I" (instructions), add the page number to the instruction page set
+                        instruction_page_set.add(page_number)
 
     return page_access_list, instruction_page_set
 
@@ -66,6 +72,30 @@ def plot_memory_access(page_access_list, png_file=None, instruction_page_set=Non
 # A good plot has clearly and accurately labeled title and axes.
 
     # TODO: Implement (remove this comment before submission if you implemented somthing)
+    # Normalize the page numbers
+    unique_pages = sorted(set(page_access_list))
+    page_to_index = {page: i for i, page in enumerate(unique_pages)}
+
+    # Transform the page access list into a 2D array
+    num_bins = 1000
+    bin_size = len(page_access_list) // num_bins
+    array = numpy.zeros((num_bins, len(unique_pages)))
+
+    for i in range(num_bins):
+        for page in page_access_list[i*bin_size:(i+1)*bin_size]:
+            array[i, page_to_index[page]] = 1
+
+    # Plot the result
+    matplotlib.imshow(array.T, aspect='auto', origin='lower')
+    matplotlib.xlabel('Memory Access')
+    matplotlib.ylabel('Page')
+    matplotlib.title('Memory Access Plot')
+
+    # Save or show the plot
+    if png_file != None:
+        matplotlib.savefig(png_file)
+    else:
+        matplotlib.show()
 
     return
 
@@ -75,3 +105,11 @@ def export_page_trace(page_access_list, output_file):
     # TODO: Implement (remove this comment before submission if you implemented somthing)
 
     return
+
+def main():
+    getList, getInstructions = get_page_list("./testinput3.txt")
+    plot_memory_access(getList, None, getInstructions)
+
+if __name__ == "__main__":
+    main()
+
