@@ -1,3 +1,6 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
 #!/usr/bin/env python3
 
 #
