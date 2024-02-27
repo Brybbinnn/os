@@ -94,13 +94,3 @@ def export_page_trace(page_access_list, output_file):
     with open(output_file, 'w') as f:
         for line in ret_list:
             f.write(str(line) + '\n')
-
-
-def main():
-    getList, getInstructions = get_page_list("./trace-ls.txt")
-    plot_memory_access(getList, None, getInstructions)
-    #export_page_trace(getList, "./compile-scheduler-out.txt")
-
-if __name__ == "__main__":
-    main()
-
