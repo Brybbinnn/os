@@ -101,14 +101,51 @@ def plot_memory_access(page_access_list, png_file=None, instruction_page_set=Non
 
 
 def export_page_trace(page_access_list, output_file):
+# To speed up the simulation, remove adjacent duplicated pages in your page access
+# list. We assume that immediately after accessing a page, if the next access is to the
+# same page, it will not be a page fault. So removing those duplicates does not change
+# the total number of page faults (for FIFO, LRU, RAND, and OPT policies – would
+# have an impact on LFU/MFU). So this is valid to compare different policies.
+    
+# Write the page list to a simple file (as expected by the simulation tool) with with one
+# page number per line, in decimal.
 
     # TODO: Implement (remove this comment before submission if you implemented somthing)
 
-    return
+    #page_number = int(v_address, 16) // page_size # Convert the virtual address to a page number
+
+    ret_list = []
+
+    for i in range(len(page_access_list) - 1):  # subtract 1 to avoid going out of range
+        if page_access_list[i] != page_access_list[i+1]:
+            ret_list.append(page_access_list[i])
+
+    # Add the last page access as it is not in the loop
+    ret_list.append(page_access_list[-1])
+
+    with open(output_file, 'w') as f:
+        for line in ret_list:
+            f.write(str(line) + '\n')
+
+
+    # ret_list = []
+
+    # for i in range(len(page_access_list)):
+    #     if i == 0 or page_access_list[i] == page_access_list[i+1] or i == len(page_access):
+    #         pass
+    #     else:
+    #         ret_list.append(page_access_list[i])
+        
+    # with open(output_file, 'w') as f:
+    #      for line in ret_list:
+    #          f.write(str(line) + '\n')
+
+
 
 def main():
-    getList, getInstructions = get_page_list("./testinput3.txt")
+    getList, getInstructions = get_page_list("./trace-ls.txt")
     plot_memory_access(getList, None, getInstructions)
+    export_page_trace(getList, "./TestOut.txt")
 
 if __name__ == "__main__":
     main()
