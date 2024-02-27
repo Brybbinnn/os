@@ -10,6 +10,7 @@ import matplotlib.pyplot as matplotlib
 # A (very short) sample trace is in the template. Find more traces on noskel.mooo.com in
 # /home/sty24/traces. You should have at least 2 traces for testing.
 
+
 def get_page_list(filename):
     # Expected functionality: Read content of file (valgrind/lackey output), and then
     # - find all lines containing memory access:
@@ -26,8 +27,7 @@ def get_page_list(filename):
     with open(filename, 'r') as file:
         for line in file:
             if "==" in line:
-                continue # Skip lines that don't contain memory access xD
-            # FISKINN MIIIIIIINN NBANANMMMI  NAMAMIM MNAJM AMMM
+                continue # Skip lines that don't contain memory access
 
             components = line.strip().split()  # Split the line into parts
             temp = components[1]
@@ -50,29 +50,7 @@ def get_page_list(filename):
 
 def plot_memory_access(page_access_list, png_file=None, instruction_page_set=None):
 
-# You need to transform the page access list into a 2D array.
-# For the X axis, use equal-sized bins into which you group subsets of the page access
-# list. Example: page access list has 1M elements, you use 1000 bins, so each bin
-# corresponds to 1000 elements of the page access list
-# For the Y axis, you first "normalize" the page numbers (these are not contiguous, but
-# it is easier to plot if you have a contiguous numbering). Define an order-preserving
-# mapping from the virtual page numbers to natural numbers in the range 0 to (num-
-# ber of different pages - 1). Example: If your page access list contains (only) the page
-# numbers 598, 4, and 42, then you map 4 to 0, 42 to 1, 598 to 2.
-# You will probably have something in the order of a few hundred to a few thousand
-# different pages. The range of your Y axis (and thus this dimension of the 2D array)
-# will equal the number of pages you have.
-# 5
-# For each bin i (X axis), and for each page k contained in the per-bin subset of the
-# page access list, you set your array[i][k] to 1 (all other array elements are 0)
-# You plot the result with np.imshow (you need transpose the array). Arrange your
-# plot such that page 0 is on the bottom, not on the top.
-# Show your output on the screen by default, or write it to a png file if an optional
-# parameter pngfile is passed to your function.
-# A good plot has clearly and accurately labeled title and axes.
-
-    # TODO: Implement (remove this comment before submission if you implemented somthing)
-    # Normalize the page numbers
+    # Get unique page numbers and sort them then map each unique page number to an index
     unique_pages = sorted(set(page_access_list))
     page_to_index = {page: i for i, page in enumerate(unique_pages)}
 
@@ -81,13 +59,14 @@ def plot_memory_access(page_access_list, png_file=None, instruction_page_set=Non
     bin_size = len(page_access_list) // num_bins
     array = numpy.zeros((num_bins, len(unique_pages)))
 
+    # Populate the bins
     for i in range(num_bins):
         for page in page_access_list[i*bin_size:(i+1)*bin_size]:
             array[i, page_to_index[page]] = 1
 
     # Plot the result
     matplotlib.imshow(array.T, aspect='auto', origin='lower')
-    matplotlib.xlabel('Memory Access')
+    matplotlib.xlabel('Memory Access Bins')
     matplotlib.ylabel('Page')
     matplotlib.title('Memory Access Plot')
 
@@ -101,51 +80,26 @@ def plot_memory_access(page_access_list, png_file=None, instruction_page_set=Non
 
 
 def export_page_trace(page_access_list, output_file):
-# To speed up the simulation, remove adjacent duplicated pages in your page access
-# list. We assume that immediately after accessing a page, if the next access is to the
-# same page, it will not be a page fault. So removing those duplicates does not change
-# the total number of page faults (for FIFO, LRU, RAND, and OPT policies – would
-# have an impact on LFU/MFU). So this is valid to compare different policies.
-    
-# Write the page list to a simple file (as expected by the simulation tool) with with one
-# page number per line, in decimal.
-
-    # TODO: Implement (remove this comment before submission if you implemented somthing)
-
-    #page_number = int(v_address, 16) // page_size # Convert the virtual address to a page number
 
     ret_list = []
 
-    for i in range(len(page_access_list) - 1):  # subtract 1 to avoid going out of range
+    for i in range(len(page_access_list) - 1): # If the current page access is different from the next one, we add it to the list
         if page_access_list[i] != page_access_list[i+1]:
-            ret_list.append(page_access_list[i])
+            ret_list.append(page_access_list[i]) 
 
     # Add the last page access as it is not in the loop
     ret_list.append(page_access_list[-1])
 
+    # Write the page accesses to the outputfile
     with open(output_file, 'w') as f:
         for line in ret_list:
             f.write(str(line) + '\n')
 
 
-    # ret_list = []
-
-    # for i in range(len(page_access_list)):
-    #     if i == 0 or page_access_list[i] == page_access_list[i+1] or i == len(page_access):
-    #         pass
-    #     else:
-    #         ret_list.append(page_access_list[i])
-        
-    # with open(output_file, 'w') as f:
-    #      for line in ret_list:
-    #          f.write(str(line) + '\n')
-
-
-
 def main():
     getList, getInstructions = get_page_list("./trace-ls.txt")
     plot_memory_access(getList, None, getInstructions)
-    export_page_trace(getList, "./TestOut.txt")
+    #export_page_trace(getList, "./compile-scheduler-out.txt")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,3 @@
+For mempattern-1.png, we used the trace 'trace-ls.txt' from noskel.
+
+For mempattern-2.png, we used the trace 'trace-compile-scheduler.txt' from noskel.
