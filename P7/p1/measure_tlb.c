@@ -15,18 +15,24 @@ int64_t measureFunction( int(*function)(void *), void *arg ) {
 	(void)function;
 	(void)arg;
 
+// 	Invokes the function referenced by function, passing arg as parameter;
+// before and after the invocation, uses the API function clock gettime (see man
+// page) to obtain a high-precision time stamp; and finally
+// if function returns an error code (value < 0), returns -1;
+// otherwise, returns the elapsed time (difference between the two time stamps) in
+// nanoseconds.
 
 	// Gibb Code, Not Tested
 	struct timespec start, end;
 
     // Get start time
-    clock_gettime(&start);
+    clock_gettime(CLOCK_MONOTONIC, &start);
 
     // Invoke the function
     int result = function(arg);
 
     // Get end time
-    clock_gettime(&end);
+    clock_gettime(CLOCK_MONOTONIC, &end);
 
     // Calculate elapsed time in nanoseconds
     int64_t elapsed_ns = (int64_t)(end.tv_sec - start.tv_sec) * 1000000000LL + (end.tv_nsec - start.tv_nsec);
@@ -40,9 +46,36 @@ int64_t measureFunction( int(*function)(void *), void *arg ) {
 
 int accessMemory(uint64_t memsize, uint64_t count, uint64_t step) {
 	// TODO: Implement (Part P7.1b)
+
 	(void)memsize;
+	// Allocate (and deallocate when done) this memory on your program's heap.
 	(void)count;
+	// In total the function should access (read) the memory count times (read a single uint64 t value from memory each time).
 	(void)step;
+	// After each read access, the program advances step bytes for the next access, wrapping back to the beginning when it reaches the end of the allocated memory.
+
+	uint64_t mem = malloc(memsize);
+
+	for (int *i; i != count; i += step) {
+		if (&i == memsize) {
+			// tf we readin???????
+			continue;
+		} else {
+			// To get a value from a memory address in C, you need to use the dereference operator, which is the asterisk (*).
+			// First, declare a pointer variable that stores the memory address, then use the dereference operator with the pointer
+			// variable to access the value stored at that memory address. For example: `int *ptr = &someVariable; int value = *ptr;`,where `&someVariable` is the memory address of an integer `someVariable`, and `value` will store the data at that address.
+			
+			print("%p", *i);
+
+		}
+
+	}
+
+
+	// Example: With memsize=3000, step=1000, and count=10, your program shall read from these offsets in the allocated memory: 0, 1000, 2000, 0, 1000, 2000, 0, 1000, 2000, 0.
+	
+	// In case of insufficient available memory, your function shall print an error message and return the error code -1. On success, return 0.
+
 	return -1;
 }
 
