@@ -10,8 +10,8 @@
 
 #define PAGESIZE 4096
 
-int64_t measureFunction( int(*function)(void *), void *arg ) {
-	// TODO: Implement! (Part P7.1a)
+int64_t measureFunction( int(*function)(void *), void *arg ) { // A
+
 	(void)function;
 	(void)arg;
 
@@ -22,86 +22,77 @@ int64_t measureFunction( int(*function)(void *), void *arg ) {
 // otherwise, returns the elapsed time (difference between the two time stamps) in
 // nanoseconds.
 
-	// Gibb Code, Not Tested
 	struct timespec start, end;
 
     // Get start time
     clock_gettime(CLOCK_MONOTONIC, &start);
 
     // Invoke the function
-    int result = function(arg);
+    if (function(arg) < 0) {
+		return -1;
+	}
 
     // Get end time
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     // Calculate elapsed time in nanoseconds
-    int64_t elapsed_ns = (int64_t)(end.tv_sec - start.tv_sec) * 1000000000LL + (end.tv_nsec - start.tv_nsec);
+	double elapsed_ns;
+	elapsed_ns = (end.tv_sec - start.tv_sec);
+    elapsed_ns = (elapsed_ns + (end.tv_nsec - start.tv_nsec)) * 1e-9;
 
-    if (result < 0) {
-        return -1;
-    } else {
-        return elapsed_ns;
-    }
+    return elapsed_ns;
 }
 
-int accessMemory(uint64_t memsize, uint64_t count, uint64_t step) {
-	// TODO: Implement (Part P7.1b)
+int accessMemory(uint64_t memsize, uint64_t count, uint64_t step) { // B
 
-	(void)memsize;
-	// Allocate (and deallocate when done) this memory on your program's heap.
-	(void)count;
-	// In total the function should access (read) the memory count times (read a single uint64 t value from memory each time).
-	(void)step;
-	// After each read access, the program advances step bytes for the next access, wrapping back to the beginning when it reaches the end of the allocated memory.
+	void *allocated_memory = malloc(memsize);
 
-	uint64_t mem = malloc(memsize);
-
-	for (int *i; i != count; i += step) {
-		if (&i == memsize) {
-			// tf we readin???????
-			continue;
-		} else {
-			// To get a value from a memory address in C, you need to use the dereference operator, which is the asterisk (*).
-			// First, declare a pointer variable that stores the memory address, then use the dereference operator with the pointer
-			// variable to access the value stored at that memory address. For example: `int *ptr = &someVariable; int value = *ptr;`,where `&someVariable` is the memory address of an integer `someVariable`, and `value` will store the data at that address.
-			
-			// https://stackoverflow.com/questions/15638105/accessing-specific-memory-locations-in-c
-
-			//  Find address.
-			char buf[100];
-			sprintf(buf, "%" PRIuPTR, (uintptr_t) &x);
-			printf("The address of x is %s.\n", buf);
-
-			//  Read the address.
-			uintptr_t u;
-			sscanf(buf, "%" SCNuPTR, &u);
-
-			//  Convert the integer value to an address.
-			int *p = (int *) u;
-
-			print("%p", *i);
-
-		}
-
+	// If memory allocation kaput
+	if (allocated_memory == NULL) {
+		return -1;
+	}
+	// If insufficient memory
+	if ((memsize / count) < step) {
+		return -1;
 	}
 
+	// Cast to char to access memory
+	char *memory = (char *)allocated_memory;
+	uint64_t index = 0;
+	char value = 0;
 
-	// Example: With memsize=3000, step=1000, and count=10, your program shall read from these offsets in the allocated memory: 0, 1000, 2000, 0, 1000, 2000, 0, 1000, 2000, 0.
-	
-	// In case of insufficient available memory, your function shall print an error message and return the error code -1. On success, return 0.
-
-	return -1;
+	for (uint64_t i = 0; i < count; i++) {
+		value = memory[index];
+		index = (index + step) & (memsize - 1);
+	}
+	free(memory);
+		(void)value;
+	return 0;
 }
 
-int accessMemoryWrapper(void *p) {
-	// TODO: Implement (Part P7.1c)
+int accessMemoryWrapper(void *p) { // C
+
 	(void)p;
-	return -1;
+	// Cast the void* parameter to MeasurementParameters*
+    MeasurementParameters *param = (MeasurementParameters*)p;
+
+    // Extract parameters from the structure
+    uint64_t memsize = param->memsize;
+    uint64_t count = param->count;
+    uint64_t step = param->step;
+
+    // Call the original function with extracted parameters
+    int access = accessMemory(memsize, count, step);
+
+    // Return the result of the accessMemory function
+    return access;
 }
 
 // Feel free to adjust: Higher: Better accuracy; Lower: Faster
 #define COUNT 10000000
-void executeMeasurement() {
+#define MEMORY_LIMIT (1ULL << 30)  // 1 GiB
+
+void executeMeasurement() { // D
 	MeasurementParameters params;
 	// Print some header...
 	printf(" Memory_size ; ");
@@ -109,24 +100,29 @@ void executeMeasurement() {
 	printf("step ; cachelines ;     tlbs ; time_duration ; ");
 	printf("\n");
 
-	// TODO: You may add code here
-	while(1) {
+	params.memsize = PAGESIZE * 2; // I changed this line!
+	params.count = COUNT;
+	// I added code here!
+	while(params.memsize <= MEMORY_LIMIT) {
 		// TODO: You may add code here: Set memory size for this iteration
-		params.memsize = 8192; // Change this line!
-		printf("%12" PRIu64 " ; ", params.memsize); // Do not change printf's in here!
+		printf("%12" PRIu64 " ; ", params.memsize); // I did not change the printf's in here!
 
 		// This for loop will execute two times with step=64 and step=4096
 		for(uint64_t step = 64; step <= 4096; step *= 64) {
-			uint64_t t1 = 0;	// use this variable for your measurement result
-			(void)t1;
+			// use this variable for your measurement result
 
 			// TODO: You may add code here ........... (main part of this function!)
 
-			// Find out number number of cache lines (loc) and number of TLB entires (pages),
+			params.step = step;
+
+			int (*fptr)(void *) = accessMemoryWrapper;
+
+			uint64_t t1 = measureFunction(fptr, &params);
+
+			// Find out number number of cache lines (locs) and number of TLB entries (pages),
 			// corresponding to the memory size
-			// TODO: Modify the next two lines!
-			uint64_t locs = 8192 / step;
-			uint64_t pag = 2;
+			uint64_t locs = params.memsize / step;
+			uint64_t pag = params.memsize / PAGESIZE;
 
 			// Do not change printf's in here!
 			printf("%4" PRIu64 " ; %10" PRIu64 " ; %8" PRIu64 " ; %13.8f ; ",
@@ -134,12 +130,9 @@ void executeMeasurement() {
 		}
 		printf("\n");
 		// TODO: Maybe you add code here as well...
+		// Maybe I increased the memory size for the next iteration...
+		params.memsize *= 2;
 
-		// And maybe remove this line...
-		break;
+		// And maybe remove this line... or maybe not...
 	}
 }
-
-
-
-
