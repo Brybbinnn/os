@@ -65,6 +65,20 @@ int accessMemory(uint64_t memsize, uint64_t count, uint64_t step) {
 			// First, declare a pointer variable that stores the memory address, then use the dereference operator with the pointer
 			// variable to access the value stored at that memory address. For example: `int *ptr = &someVariable; int value = *ptr;`,where `&someVariable` is the memory address of an integer `someVariable`, and `value` will store the data at that address.
 			
+			// https://stackoverflow.com/questions/15638105/accessing-specific-memory-locations-in-c
+
+			//  Find address.
+			char buf[100];
+			sprintf(buf, "%" PRIuPTR, (uintptr_t) &x);
+			printf("The address of x is %s.\n", buf);
+
+			//  Read the address.
+			uintptr_t u;
+			sscanf(buf, "%" SCNuPTR, &u);
+
+			//  Convert the integer value to an address.
+			int *p = (int *) u;
+
 			print("%p", *i);
 
 		}
