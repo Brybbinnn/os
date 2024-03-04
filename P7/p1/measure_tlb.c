@@ -14,7 +14,28 @@ int64_t measureFunction( int(*function)(void *), void *arg ) {
 	// TODO: Implement! (Part P7.1a)
 	(void)function;
 	(void)arg;
-	return -1;
+
+
+	// Gibb Code, Not Tested
+	struct timespec start, end;
+
+    // Get start time
+    clock_gettime(&start);
+
+    // Invoke the function
+    int result = function(arg);
+
+    // Get end time
+    clock_gettime(&end);
+
+    // Calculate elapsed time in nanoseconds
+    int64_t elapsed_ns = (int64_t)(end.tv_sec - start.tv_sec) * 1000000000LL + (end.tv_nsec - start.tv_nsec);
+
+    if (result < 0) {
+        return -1;
+    } else {
+        return elapsed_ns;
+    }
 }
 
 int accessMemory(uint64_t memsize, uint64_t count, uint64_t step) {
