@@ -28,6 +28,7 @@ int64_t measureFunction( int(*function)(void *), void *arg ) { // A
     clock_gettime(CLOCK_MONOTONIC, &start);
 
     // Invoke the function
+
     if (function(arg) < 0) {
 		return -1;
 	}
@@ -38,7 +39,7 @@ int64_t measureFunction( int(*function)(void *), void *arg ) { // A
     // Calculate elapsed time in nanoseconds
 	double elapsed_ns;
 	elapsed_ns = (end.tv_sec - start.tv_sec);
-    elapsed_ns = (elapsed_ns + (end.tv_nsec - start.tv_nsec)) * 1e-9;
+    elapsed_ns = (elapsed_ns + (end.tv_nsec - start.tv_nsec));
 
     return elapsed_ns;
 }
@@ -49,10 +50,6 @@ int accessMemory(uint64_t memsize, uint64_t count, uint64_t step) { // B
 
 	// If memory allocation kaput
 	if (allocated_memory == NULL) {
-		return -1;
-	}
-	// If insufficient memory
-	if ((memsize / count) < step) {
 		return -1;
 	}
 
@@ -117,7 +114,7 @@ void executeMeasurement() { // D
 
 			int (*fptr)(void *) = accessMemoryWrapper;
 
-			uint64_t t1 = measureFunction(fptr, &params);
+			int64_t t1 = measureFunction(fptr, &params);
 
 			// Find out number number of cache lines (locs) and number of TLB entries (pages),
 			// corresponding to the memory size

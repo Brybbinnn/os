@@ -15,7 +15,3 @@ int main()
     executeMeasurement();
     return test_end();
 }
-
-
-
-
