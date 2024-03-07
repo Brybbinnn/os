@@ -12,14 +12,23 @@
 
 char *get_output(char *argv[])
 {
+
+    int pipes[2];
+
+    pipe(pipes);
+
+    dup2(pipes[1], 1);
+
     // Create child process
     int child_pid = fork();
     if (child_pid == -1) {
-	perror("fork failed");
-	return NULL;
+        perror("fork failed");
+        return NULL;
     } else if (child_pid == 0) {
         // Replace program
+
         execvp(argv[0], argv);
+
 	perror("execvp failed");
 	// The child process must terminate if execp failed!
         exit(255);
@@ -28,7 +37,9 @@ char *get_output(char *argv[])
 	int status;
         waitpid(child_pid, &status, 0);
 	
-	char *ptr = strdup("Fake output. Functionality not implemented");
-	return ptr;
+
+	char *ptr = strdup(pipes[1]);
+    
+    return ptr;
     }
 }
