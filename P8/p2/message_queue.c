@@ -34,21 +34,19 @@ typedef struct _Message {
 #define FORMAT_STRING_ADD      "Calc: %d + %d = %d\n"
 #define FORMAT_STRING_MUL      "Calc: %d * %d = %d\n"
 
+// Initialize sending messages to the server
 mqd_t startClient(void)
 {
-    // TODO: Open the message queue previously created by the server
     mqd_t client = mq_open(QUEUE_NAME, O_WRONLY);
-    if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
+    if (client == (mqd_t)-1) {
         return -1;
     }
     return client;
 }
 
+// Send a command to server to terminate it
 int sendExitTask(mqd_t client)
 {
-    (void)client;
-
-    // TODO: Send the exit command to the server.
     Message msg = {CmdExit, 0, 0};
     if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
         return -1;
@@ -59,13 +57,9 @@ int sendExitTask(mqd_t client)
     return 0;
 }
 
+// Send a command to server to add two numbers
 int sendAddTask(mqd_t client, int operand1, int operand2)
 {
-    (void)client;
-    (void)operand1;
-    (void)operand2;
-
-    // TODO: Send the add command with the operands
     Message msg = {CmdAdd, operand1, operand2};
     if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
         return -1;
@@ -73,13 +67,10 @@ int sendAddTask(mqd_t client, int operand1, int operand2)
     return 0;
 }
 
+
+// Send a command to server to multiply two numbers
 int sendMulTask(mqd_t client, int operand1, int operand2)
 {
-    (void)client;
-    (void)operand1;
-    (void)operand2;
-
-    // TODO: Send the mul command with the operands
     Message msg = {CmdMul, operand1, operand2};
     if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
         perror("mq_send (mul)");
@@ -88,17 +79,16 @@ int sendMulTask(mqd_t client, int operand1, int operand2)
     return 0;
 }
 
+// Close the message queue used by the client
 int stopClient(mqd_t client)
 {
-    (void)client;
-
-    // TODO: Clean up anything on the client-side
     if (mq_close(client) == -1) {
         return -1;
     }
     return 0;
 }
 
+// Server proccesses incoming messages
 int runServer(void)
 {
     int didExit = 0, hadError = 0;
@@ -111,21 +101,11 @@ int runServer(void)
     attr.mq_curmsgs = 0;
     (void) attr;
 
-    // TODO:
-    // Create and open the message queue. Server only needs to read from it.
-    // Clients only need to write to it, allow for all users.
-    
-    mqd_t server = -1;
-    if(server == -1) {
-
-        
-
+    mqd_t server = mq_open(QUEUE_NAME, O_CREAT | O_EXCL | O_RDONLY, 0644, &attr);
+    if(server == (mqd_t)-1) {
         return -1;
     }
 
-
-    // This is the implementation of the server part, already completed:
-    // TODO: You may have to make minor extensions in order to satisfy all requirements
     do {
         // Attempt to receive a message from the queue.
         ssize_t received = mq_receive(server, (char*)&msg, sizeof(msg), NULL);
@@ -163,9 +143,14 @@ int runServer(void)
         }
     } while (!didExit);
 
+    // Clean uð: close the message queue and unlink it.
+    if (mq_close(server) == -1) {
+        hadError = 1;
+    }
 
-    // TODO
-    // Close the message queue on exit and unlink it
+    if (mq_unlink(QUEUE_NAME) == -1) {
+        hadError = 1;
+    }
 
     return hadError ? -1 : 0;
 }
