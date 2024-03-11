@@ -37,14 +37,26 @@ typedef struct _Message {
 mqd_t startClient(void)
 {
     // TODO: Open the message queue previously created by the server
-    return -1;}
+    mqd_t client = mq_open(QUEUE_NAME, O_WRONLY);
+    if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
+        return -1;
+    }
+    return client;
+}
 
 int sendExitTask(mqd_t client)
 {
     (void)client;
 
     // TODO: Send the exit command to the server.
-    return -1;
+    Message msg = {CmdExit, 0, 0};
+    if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
+        return -1;
+    }
+
+    stopClient(client);
+
+    return 0;
 }
 
 int sendAddTask(mqd_t client, int operand1, int operand2)
@@ -54,7 +66,11 @@ int sendAddTask(mqd_t client, int operand1, int operand2)
     (void)operand2;
 
     // TODO: Send the add command with the operands
-    return -1;
+    Message msg = {CmdAdd, operand1, operand2};
+    if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
+        return -1;
+    }
+    return 0;
 }
 
 int sendMulTask(mqd_t client, int operand1, int operand2)
@@ -64,7 +80,12 @@ int sendMulTask(mqd_t client, int operand1, int operand2)
     (void)operand2;
 
     // TODO: Send the mul command with the operands
-    return -1;
+    Message msg = {CmdMul, operand1, operand2};
+    if (mq_send(client, (const char*)&msg, sizeof(msg), 0) == -1) {
+        perror("mq_send (mul)");
+        return -1;
+    }
+    return 0;
 }
 
 int stopClient(mqd_t client)
@@ -72,8 +93,10 @@ int stopClient(mqd_t client)
     (void)client;
 
     // TODO: Clean up anything on the client-side
-    return -1;
-
+    if (mq_close(client) == -1) {
+        return -1;
+    }
+    return 0;
 }
 
 int runServer(void)
@@ -91,9 +114,13 @@ int runServer(void)
     // TODO:
     // Create and open the message queue. Server only needs to read from it.
     // Clients only need to write to it, allow for all users.
+    
     mqd_t server = -1;
     if(server == -1) {
-	return -1;
+
+        
+
+        return -1;
     }
 
 
