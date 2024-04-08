@@ -15,28 +15,76 @@
 #include <assert.h>
 #include <string.h>
 
-FileSystem *initFileSystem(char *diskFile)
-{
-	if (diskFile == NULL) {
-		return NULL;
-	}
+FileSystem *initFileSystem(char *diskFile) {
+    if (diskFile == NULL) {
+        return NULL;
+    }
 
-	// Implement a function that opens a full disk image
+    int fd = open(diskFile, O_RDONLY);
+    if (fd == -1) {
+        perror("Error opening disk image");
+        return NULL;
+    }
 
-	// allocate a file system data structure
-	FileSystem *fs = malloc(sizeof(FileSystem));
-	// read and store in memory the full header and FAT from the disk image
-	// return a reference to the data structure
+    // Calculate the fixed size of the header by considering the size of the structure with one block_t
+    size_t fixedHeaderSize = sizeof(FileSystemHeader) - sizeof(block_t);
 
+    FileSystemHeader tmpHeader;
+    ssize_t bytesRead = read(fd, &tmpHeader, fixedHeaderSize);
+    if (bytesRead == -1) {
+        perror("Error reading initial part of file system header");
+        close(fd);
+        return NULL;
+    }
+    if ((size_t)bytesRead != fixedHeaderSize) {
+        fprintf(stderr, "Incomplete read of the file system header\n");
+        close(fd);
+        return NULL;
+    }
 
-	// ----------------
-	// open file system image and read header + FAT into a FileSystemHeader data structure
-	// (all memory allocated dynamically with malloc)^
-	// ----------------
+    size_t fatSize = sizeof(block_t) * tmpHeader.fsBlocks;
+    int headerSize = fixedHeaderSize + fatSize;
 
+    FileSystemHeader *header = (FileSystemHeader *)malloc(headerSize);
+    if (header == NULL) {
+        perror("Memory allocation error for FileSystemHeader");
+        close(fd);
+        return NULL;
+    }
 
-	return NULL;
+    // Copy the already read part of the header
+    memcpy(header, &tmpHeader, fixedHeaderSize);
+
+    // Read the FAT into the allocated header memory
+    bytesRead = read(fd, header->fat, fatSize);
+    if (bytesRead == -1) {
+        perror("Error reading FAT");
+        close(fd);
+        free(header);
+        return NULL;
+    }
+    if ((size_t)bytesRead != fatSize) {
+        fprintf(stderr, "Incomplete read of the FAT\n");
+        close(fd);
+        free(header);
+        return NULL;
+    }
+
+    FileSystem *fs = (FileSystem *)malloc(sizeof(FileSystem));
+    if (fs == NULL) {
+        perror("Memory allocation error for FileSystem");
+        close(fd);
+        free(header);
+        return NULL;
+    }
+
+    fs->header = header;
+    fs->headerSize = headerSize;
+    fs->fd = fd;
+
+    return fs;
 }
+
 
 // Create a file handle representing a file that is part of a specific file system (fs),
 // starting at block (blockIndex) in that file system, and a file length (length) in bytes
@@ -62,7 +110,9 @@ static OpenFileHandle *_openFileAtBlock(FileSystem *fs, uint32_t blockIndex,
 
 static int _hasMoreBytes(OpenFileHandle *handle)
 {
-	(void)handle;
+	if (handle->currentFileOffset < handle->length) {
+		return 1;
+	}
 
 	// ----------------
 	// Check if there are more bytes to read in the file.
@@ -130,16 +180,24 @@ void closeFile(OpenFileHandle *handle)
 	free(handle);
 }
 
-char _readFileByte(OpenFileHandle *handle)
-{
-	(void)handle;
+char _readFileByte(OpenFileHandle *handle) {
+    char byte;
+    // Initialize the byte with a default value (e.g., 0)
+    // This is important in case readFile doesn't read any bytes (e.g., due to an error or EOF)
+    byte = 0;
 
-	// ----------------
-	// Read a byte from the file. This should never fail, because the function
-	// must not be called if there are not more bytes to read.
-	// ----------------
+    // Call readFile to read exactly one byte into 'byte'
+    int bytesRead = readFile(handle, &byte, 1);
 
-	return 0;
+    // Check if readFile successfully read one byte
+    if (bytesRead == 1) {
+        // Successfully read one byte, return it
+        return byte;
+    } else {
+        return 0;
+    }
+
+    return byte;  // Return the read byte or the default value if no byte was read
 }
 
 int readFile(OpenFileHandle *handle, char *buffer, int length)
