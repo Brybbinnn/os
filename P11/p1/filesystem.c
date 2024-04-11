@@ -4,7 +4,6 @@
  * Student 2 name: Viggó Ýmir Hafliðason
  */
 
-
 #include "filesystem.h"
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -22,17 +21,27 @@ FileSystem *initFileSystem(char *diskFile) {
 
     int fd = open(diskFile, O_RDONLY);
     if (fd == -1) {
-        perror("Error opening disk image");
         return NULL;
     }
 
     // Calculate the fixed size of the header by considering the size of the structure with one block_t
-    size_t fixedHeaderSize = sizeof(FileSystemHeader) - sizeof(block_t);
+    // size_t fixedHeaderSize = sizeof(FileSystemHeader) - sizeof(block_t);
+    size_t fixedHeaderSize = 3*sizeof(uint32_t);
 
-    FileSystemHeader tmpHeader;
-    ssize_t bytesRead = read(fd, &tmpHeader, fixedHeaderSize);
+    /*
+        0. git good // git commit -m "good"
+        1. read disk file
+        2. make FileSystem var
+        3. make FileSystemHeader
+        4. ...
+        5. Profit!🤑
+    */
+
+    FileSystem *fs = (FileSystem *)malloc(sizeof(FileSystem));
+    fs->header = (FileSystemHeader*)malloc(sizeof(FileSystemHeader));
+    
+    ssize_t bytesRead = read(fd, fs->header, fixedHeaderSize);
     if (bytesRead == -1) {
-        perror("Error reading initial part of file system header");
         close(fd);
         return NULL;
     }
@@ -41,46 +50,24 @@ FileSystem *initFileSystem(char *diskFile) {
         close(fd);
         return NULL;
     }
-
-    size_t fatSize = sizeof(block_t) * tmpHeader.fsBlocks;
+    // FIXED: HEADER konnfirmed correct
+    printf("Magic: %#010x\n", fs->header->magic);
+    printf("Block count: %d\n", fs->header->fsBlocks);
+    printf("root dir : %d\n", fs->header->rootDirectorySize);
+    //
+    // size_t fatSize = sizeof(block_t) * header.fsBlocks;   fat[1] = 4 fat[1] = 0
+    size_t fatSize = read(fd, fs->header->fat, fs->header->fsBlocks*sizeof(uint16_t));
     int headerSize = fixedHeaderSize + fatSize;
+    printf("fat[0]: %d\n", fs->header->fat[0]);
+    printf("fat[1]: %d\n\n", fs->header->fat[1]);
+    
+    printf("fatSize: %ld\n", fatSize);
+    printf("Header size: %d\n", headerSize);
 
-    FileSystemHeader *header = (FileSystemHeader *)malloc(headerSize);
-    if (header == NULL) {
-        perror("Memory allocation error for FileSystemHeader");
-        close(fd);
-        return NULL;
-    }
+    printf("mem loc 1 %p\n", &fs->header->magic);
+    printf("mem loc 2 %p\n", &fd);
 
-    // Copy the already read part of the header
-    memcpy(header, &tmpHeader, fixedHeaderSize);
 
-    // Read the FAT into the allocated header memory
-    bytesRead = read(fd, header->fat, fatSize);
-    if (bytesRead == -1) {
-        perror("Error reading FAT");
-        close(fd);
-        free(header);
-        return NULL;
-    }
-    if ((size_t)bytesRead != fatSize) {
-        fprintf(stderr, "Incomplete read of the FAT\n");
-        close(fd);
-        free(header);
-        return NULL;
-    }
-
-    FileSystem *fs = (FileSystem *)malloc(sizeof(FileSystem));
-    if (fs == NULL) {
-        perror("Memory allocation error for FileSystem");
-        close(fd);
-        free(header);
-        return NULL;
-    }
-
-    fs->header = header;
-    fs->headerSize = headerSize;
-    fs->fd = fd;
 
     return fs;
 }
@@ -123,50 +110,71 @@ static int _hasMoreBytes(OpenFileHandle *handle)
 
 #define INVALID_BLOCK_INDEX (uint32_t)-1
 
+int _findDirectoryEntry(OpenFileHandle *dir, char *name, DirectoryEntry *dirEntry) {
+    if (dir == NULL || name == NULL || dirEntry == NULL) {
+        return -1;  // Invalid arguments
+    }
 
-int _findDirectoryEntry(OpenFileHandle *dir, char *name, DirectoryEntry *dirEntry)
-{
-	// TODO: Implement
-	(void)dir;
-	(void)name;
-	(void)dirEntry;
+    // Assuming that DIRECTORY_ENTRY_SIZE is the size of a DirectoryEntry structure
+    const size_t DIRECTORY_ENTRY_SIZE = sizeof(DirectoryEntry);
+    DirectoryEntry entry;
 
-	return -1;
+    // Start from the beginning of the directory file
+    dir->currentFileOffset = 0;
+
+    while (1) {
+        // Read one DirectoryEntry at a time
+        size_t bytesRead = readFile(dir, (char *)&entry, DIRECTORY_ENTRY_SIZE);
+
+        // Check if we have read a full DirectoryEntry
+        if (bytesRead == DIRECTORY_ENTRY_SIZE) {
+            // Compare the current entry's name with the requested name
+            if (strcmp(entry.name, name) == 0) {
+                // Name matches, copy the found entry to dirEntry and return 0
+                *dirEntry = entry;
+                return 0;  // Found the requested entry
+            }
+            // If names don't match, continue reading the next entry
+        } else {
+            // Either an error occurred, or we've reached the end of the directory file
+            // Since we didn't find the entry, return -1
+            break;
+        }
+    }
+
+    return -1;  // Entry not found
 }
 
-OpenFileHandle *openFile(FileSystem *fs, char *dir, char *name)
-{
-	if ((fs == NULL) || (name == NULL)) {
-		return NULL;
-	}
 
-	// Open the root directory file.
-	OpenFileHandle *root = _openFileAtBlock(fs, ROOT_DIRECTORY_BLOCK,
-						fs->header->rootDirectorySize);
-	if (root == NULL) {
-		return NULL;
-	}
+OpenFileHandle *openFile(FileSystem *fs, char *dir, char *name) {
+	(void)*dir;
+
+    if ((fs == NULL) || (name == NULL)) {
+        return NULL;
+    }
+
+    // Open the root directory file.
+    OpenFileHandle *root = _openFileAtBlock(fs, ROOT_DIRECTORY_BLOCK, fs->header->rootDirectorySize);
+    if (root == NULL) {
+        return NULL;  // Failed to open root directory
+    }
   
-	// ----------------
-	// For the bonus part only: If dir is not NULL:
-	// find the directory (in the root directory) with that name
-	// open that directory, and use that instead of root for searching the file name
-	// ----------------
-	(void)dir;
+    DirectoryEntry dirEntry;
+    int found = _findDirectoryEntry(root, name, &dirEntry);
 
-	// ----------------
-	// Find the directory entry with that name.
-	// You can use readFile to read from the directory stream.
-	// ----------------
+    // Close the root directory handle as it's no longer needed
+    closeFile(root);
 
-	closeFile(root);
+    if (found != 0 || dirEntry.type != FTYPE_REGULAR) {
+        // File name not found or entry is not a regular file
+        return NULL;
+    }
 
-	// ----------------
-	// Return a file handle if the file could be found.
-	// ----------------
-	return NULL;
-
+    // If the file is found and it's a regular file, open a new file handle for it
+    OpenFileHandle *fileHandle = _openFileAtBlock(fs, dirEntry.firstBlock, dirEntry.length);
+    return fileHandle;  // Returns the new file handle or NULL if _openFileAtBlock fails
 }
+
 
 void closeFile(OpenFileHandle *handle)
 {

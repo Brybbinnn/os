@@ -19,6 +19,12 @@ int main()
         test_failed_message("No file system returned.");
         return test_end();
     }
+    
+    printf("Magic: %#010x\n", fs->header->magic);
+    printf("Block count: %d\n", fs->header->fsBlocks);
+    printf("root dir : %d\n", fs->header->rootDirectorySize);
+    printf("fat[0]: %d\n", fs->header->fat[0]);
+    printf("fat[1]: %d\n\n", fs->header->fat[1]);
 
     // Test that you loaded the right file system.
     test_equals_int64(fs->header->rootDirectorySize, 6 * sizeof (DirectoryEntry));
